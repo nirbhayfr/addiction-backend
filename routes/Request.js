@@ -1,5 +1,6 @@
 import express from "express";
 import Request from "../models/Request.js";
+import { sendCallbackMail } from "../config/sendMail.js";
 
 const router = express.Router();
 
@@ -7,9 +8,21 @@ const router = express.Router();
 router.post("/", async (req, res) => {
 	try {
 		const data = await Request.create(req.body);
-		res.status(201).json({ success: true, data });
+
+		await sendCallbackMail(data);
+
+		res.status(201).json({
+			success: true,
+			message: "Request submitted successfully",
+			data,
+		});
 	} catch (err) {
-		res.status(500).json({ success: false, error: err.message });
+		console.log(err);
+
+		res.status(500).json({
+			success: false,
+			error: err.message,
+		});
 	}
 });
 
